@@ -1,10 +1,10 @@
-import re
 from django.db import models
 from django.forms import SlugField
 from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models.signals import pre_save
-
+from djangoflix.db.models import PublishStateOptions
+from djangoflix.db.recivers import publish_state_pre_save,slugify_pre_save
 
 class VideoQuerySet(models.QuerySet):
     def published (self):
@@ -25,12 +25,7 @@ class VideoManager(models.Manager):
 # I stopped at the Using Django Signals lesson
 
 
-class PublishStateOptions(models.TextChoices):
-        #CONSTANT = DB_VALUE,USER_DISPLAY_VA
-        PUBLISH = 'PU', 'Published'
-        DRAFT = 'DR', 'Draft'
-        # UNLISTED = 'UN','Unlisted'
-        # Private = 'PR','Private'
+
 # Create your models here.
 class Video(models.Model):
     title  = models.CharField(max_length=255)
@@ -67,13 +62,6 @@ class VideoPublishedProxy(Video):
         verbose_name = 'Published Video'
         verbose_name_plural = 'Published Videos'
 
-def publish_state_pre_save(sender,instance,*args,**kwargs):
-
-    is_publish = instance.state==PublishStateOptions.PUBLISH
-    is_drafr = instance.state ==PublishStateOptions.DRAFT
-    if is_publish and instance.publish_timestamp is None:
-        instance.publish_timestamp=timezone.now()
-    elif is_drafr:
-        instance.publish_timestamp==None
 
 pre_save.connect(publish_state_pre_save,sender=Video)
+pre_save.connect(slugify_pre_save,sender=Video)
