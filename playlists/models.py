@@ -23,16 +23,12 @@ class PlaylistManager(models.Manager):
         return self.get_queryset().published()
 
 
-# I stopped at the Using Django Signals lesson
-
-
-
 # Create your models here.
 class Playlist(models.Model):
     title  = models.CharField(max_length=255)
     describtion = models.TextField(blank=True,null=True)
     slug = models.SlugField(blank=True,null=True) 
-    video = models.ForeignKey(Video) #### one video per playlist
+    video = models.ForeignKey(Video,null=True,on_delete=models.SET_NULL) #### one video per playlist
     active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
