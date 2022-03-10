@@ -3,12 +3,24 @@ from .models import Playlist
 from django.utils import timezone
 from django.utils.text import slugify
 from djangoflix.db.models import PublishStateOptions
+from videos.models import Video
 # Create your tests here.
 
 class PlaylistModelTestCase(TestCase):
     def setUp(self):
-        self.obj_a = Playlist.objects.create(title='This is my title')
-        self.obj_b = Playlist.objects.create(title='This is my title',state=PublishStateOptions.PUBLISH)
+        video_a = Video.objects.create(title='My title',video_id='abc123')
+        self.video_a = video_a
+        self.obj_a = Playlist.objects.create(title='This is my title',video = video_a)
+        self.obj_b = Playlist.objects.create(title='This is my title',state=PublishStateOptions.PUBLISH,video = video_a)
+
+    def test_playlist_video(self):
+        self.assertEqual(self.obj_a.video,self.video_a)
+
+
+    def test_video_playlist(self):
+        qs = self.video_a.playlist_set.all()
+        self.assertEqual(qs.count(),2)
+
 
     def test_slug_field(self):
         title = self.obj_a.title
